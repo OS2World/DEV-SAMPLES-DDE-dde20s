@@ -1,0 +1,21 @@
+# IBM Developer's Workframe/2 Make File Creation run at 15:39:39 on 04/09/93
+
+# Make File Creation run in directory:
+#   C:\WORK\DDE;
+
+# Assumed INCLUDE environment variable path:
+#   C:\TOOLKT20\C\OS2H;
+#   C:\TOOLKT20\ASM\OS2INC;
+#   C:\IBMC\INCLUDE;
+#   C:\IBMC\IBMCLASS;
+#   c:\openint2\include;
+
+
+SERVER.OBJ:  SERVER.C  \
+#  {$(INCLUDE);}os2.h  \
+#  {$(INCLUDE);}stdio.h  \
+#  {$(INCLUDE);}stdlib.h  \
+#  {$(INCLUDE);}string.h  \
+   {.;$(INCLUDE);}pmutils.h  \
+   {.;$(INCLUDE);}server.h  \
+   SERVER.MAK

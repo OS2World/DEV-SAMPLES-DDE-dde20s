@@ -70,7 +70,7 @@ int main()
   WinSendMsg(hwndFrame, WM_SETICON, WinQuerySysPointer(HWND_DESKTOP,
      SPTR_APPICON, FALSE), NULL);
 
-  while (WinGetMsg(hab, &qmsg, NULL, 0, 0))
+  while (WinGetMsg(hab, &qmsg,0, 0, 0))
     WinDispatchMsg(hab, &qmsg);
 
   WinDestroyWindow(hwndFrame);
@@ -88,6 +88,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd,USHORT msg,MPARAM mp1,MPARAM mp2)
   PDDEINIT pddei = NULL;               // DDE init struct ptr
   PDDESTRUCT pddeIn = NULL,pddeOut = NULL; // DDE Transaction struct ptr
   register int i;                      // work counter variable
+  static CONVCONTEXT Context;
 
   switch (msg)
     {
@@ -118,7 +119,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd,USHORT msg,MPARAM mp1,MPARAM mp2)
       ddesrv.fAck = FALSE;             // acknoledgement
       ddesrv.fConnected = FALSE;       // conversation established
                // let the all the know we exist and are ready...
-      WinDdeInitiate(hwnd, CV_DDEAPPNAME, CV_DDESYSTEMTOPIC);
+      WinDdeInitiate(hwnd, CV_DDEAPPNAME, CV_DDESYSTEMTOPIC,&Context);
       return 0;
 
     case  WM_PAINT :
@@ -172,7 +173,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd,USHORT msg,MPARAM mp1,MPARAM mp2)
            if (strcmp("Quotes", pddei->pszTopic) == 0)
              {                          /* Server and topic names matched    */
              ddesrv.hwndDDEClient = (HWND)mp1; // store client window handle
-             WinDdeRespond((HWND)mp1, hwnd, CV_DDEAPPNAME, "Quotes");
+             WinDdeRespond((HWND)mp1, hwnd, CV_DDEAPPNAME, "Quotes",&Context);
              strcpy(ddesrv.szTopic, "Quotes"); // record what topic is used
              ddesrv.fConnected = TRUE;  // conversation established
              WinSetWindowText(hwndFrame, "...Connected on \"Quotes\" Topic...");
@@ -182,7 +183,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd,USHORT msg,MPARAM mp1,MPARAM mp2)
             if (strcmp("System", pddei->pszTopic) == 0)
               {                        /* Server and topic names matched    */
               ddesrv.hwndDDEClient = (HWND)mp1; // store client window handle
-              WinDdeRespond((HWND) mp1, hwnd, CV_DDEAPPNAME, "System");
+              WinDdeRespond((HWND) mp1, hwnd, CV_DDEAPPNAME, "System",&Context);
               strcpy(ddesrv.szTopic, "System"); // record topic
               ddesrv.fConnected = TRUE; // conversation established
               WinSetWindowText(hwndFrame, "...Connected on System Topic...");

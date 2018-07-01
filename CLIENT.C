@@ -40,12 +40,12 @@ USHORT cbDDEMsg;                       // length of message
 BOOL fConnected = FALSE;               // status of a DDE conversation
 BOOL fAdvise = FALSE;                  // status of hot link
 
-int main()
+INT main()
 {
   static ULONG flFrameFlags = FCF_TITLEBAR|FCF_SYSMENU|FCF_SIZEBORDER|
      FCF_MINMAX|FCF_TASKLIST|FCF_MENU;
-  HAB hab = (VOID *) 0;
-  HMQ hmq = (VOID *) 0;
+  HAB hab = (ULONG ) 0;
+  HMQ hmq = (ULONG ) 0;
   QMSG qmsg;
 
   hab = WinInitialize(0);
@@ -66,10 +66,10 @@ int main()
    }
 
  /* Use default system icon */
-  WinSendMsg(hwndFrame, WM_SETICON, WinQuerySysPointer(HWND_DESKTOP, 
-    SPTR_APPICON, FALSE), NIL);
+  WinSendMsg(hwndFrame, WM_SETICON, (MPARAM)WinQuerySysPointer(HWND_DESKTOP, 
+    SPTR_APPICON, FALSE), NULL);
 
- while(WinGetMsg(hab,&qmsg,NULL,0,0))        /* Message loop */
+ while(WinGetMsg(hab,&qmsg,0,0,0))        /* Message loop */
     WinDispatchMsg(hab,&qmsg);
 
   WinDestroyWindow(hwndFrame);     /* clean up */
@@ -87,6 +87,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd,USHORT msg,MPARAM mp1,MPARAM mp2)
   static USHORT usItem = 0;            // Menu item
   PDDEINIT pddei = NULL;               // DDE init struct ptr
   PDDESTRUCT pdde = NULL,pddeOut = NULL; // DDE Transaction struct ptr
+  static CONVCONTEXT Context;
 
   switch (msg)
     {
@@ -116,7 +117,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd,USHORT msg,MPARAM mp1,MPARAM mp2)
                         IDD_INIT_DLG,
                         &ddec))
             if (!WinDdeInitiate(hwnd, ddec.szDDEServerName, 
-               ddec.szDDETopicName))
+               ddec.szDDETopicName, &Context))
               {
               WinAlarm(HWND_DESKTOP, WA_ERROR);
               WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, 
@@ -132,7 +133,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd,USHORT msg,MPARAM mp1,MPARAM mp2)
           EnableMenuItem(hwndMenu, IDM_ENDADVISE, FALSE);
           EnableMenuItem(hwndMenu, IDM_STOPCONV, FALSE);
           EnableMenuItem(hwndMenu, IDM_STARTCONV, TRUE);
-          hwndDDEserver = NULL;        // store client window handle
+          hwndDDEserver = (HWND) NULL;        // store client window handle
           WinSetWindowText(hwndFrame, "...Not Connected...");
 			  fConnected = FALSE;
           return 0;
@@ -184,7 +185,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd,USHORT msg,MPARAM mp1,MPARAM mp2)
 
         case IDM_ABOUT:
           WinDlgBox (HWND_DESKTOP, hwnd, (PFNWP) AboutDlgProc,
-                     (HMODULE) NIL, IDD_ABOUT, NULL) ;
+                     (HMODULE) NULL, IDD_ABOUT, NULL) ;
           return 0 ;
 
         } 
@@ -293,7 +294,7 @@ MRESULT EXPENTRY ClientWndProc(HWND hwnd,USHORT msg,MPARAM mp1,MPARAM mp2)
       EnableMenuItem(hwndMenu, IDM_STOPCONV, FALSE);
 		 if (fAdvise)
       EnableMenuItem(hwndMenu, IDM_ENDADVISE, FALSE);
-      hwndDDEserver = NULL;            // store client window handle
+      hwndDDEserver =(HWND) NULL;            // store client window handle
       WinSetWindowText(hwndFrame, "...Not Connected...");
       fConnected = FALSE;
       break;
@@ -314,7 +315,7 @@ VOID EXPENTRY PaintWindow(HWND hwnd,CHAR *szMsg)
   HPS hps = NULL;
   RECTL rcl;
 
-  hps = WinBeginPaint(hwnd, NULL, NULL);
+  hps = WinBeginPaint(hwnd, (HPS)NULL, NULL);
   if (!hps)
     return ;
   WinQueryWindowRect(hwnd, &rcl);
@@ -406,8 +407,7 @@ Post - a valid data segment for WM_DDE_REQUEST message is built
        and a pddestruct is returned else (error) null is returned
 */
 
-PDDESTRUCT EXPENTRY MakeDDEReqSeg(USHORT usFormat,PSZ pszItemName,USHORT 
-                                  fsStatus)
+PDDESTRUCT EXPENTRY MakeDDEReqSeg(USHORT usFormat,PSZ pszItemName,BOOL fsStatus)
 {
   PULONG pulSharedObj = NULL;     /* pointer to shared object */
   PDDESTRUCT pdde = NULL;
@@ -419,7 +419,7 @@ PDDESTRUCT EXPENTRY MakeDDEReqSeg(USHORT usFormat,PSZ pszItemName,USHORT
   /**************************************************************************/
 
   cbObjSize = (USHORT)strlen(pszItemName)+ (USHORT) 1;
-  rc = DosAllocSharedMem(&pulSharedObj, NULL, cbObjSize,
+  rc = DosAllocSharedMem((VOID *)&pulSharedObj, NULL, cbObjSize,
              PAG_COMMIT | PAG_READ | PAG_WRITE | OBJ_GIVEABLE);
   if (rc && pulSharedObj)          // check api return code and ptr
     return  NULL;
@@ -465,3 +465,4 @@ MRESULT EXPENTRY AboutDlgProc (HWND hwnd, USHORT msg, MPARAM mp1, MPARAM mp2)
 
 // $Workfile:   client.c  $
 
+
